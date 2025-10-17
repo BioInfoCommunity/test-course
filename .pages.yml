@@ -1,1 +1,15 @@
-test 2
+backend:
+  name: github
+  repo: bioinfocommunity/AlphaFold-A-practical-guide
+  branch: main  # default branch
+  auth_type: implicit
+
+collections:
+  - name: "courses"
+    label: "Courses"
+    folder: "content"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Body", name: "body", widget: "markdown" }
