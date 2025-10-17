@@ -1,15 +1,69 @@
-backend:
-  name: github
-  repo: bioinfocommunity/test-course
-  branch: main  # default branch
-  auth_type: implicit
+# .pages.yml
+# This file configures Pages CMS for your repository.
 
+# Defines the version of the CMS configuration format
+version: 1
+
+# --- Content Collections ---
+# Collections define the types of content (e.g., posts, pages, authors)
+# and where their files are located.
 collections:
-  - name: "courses"
-    label: "Courses"
-    folder: "content"
-    create: true
-    slug: "{{slug}}"
+  # 1. Blog Posts Collection
+  - name: "posts"
+    label: "Blog Posts"
+    # Pattern to find content files (e.g., Markdown files in _posts directory)
+    files: "_posts/*.md" 
+    # The default view for the editor (e.g., a simple list)
+    view: "table"
+    
+    # Fields define the editable front matter variables for each post
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Body", name: "body", widget: "markdown" }
+      - name: "title"
+        label: "Title"
+        type: "string"
+        required: true
+      - name: "date"
+        label: "Publish Date"
+        type: "date"
+        # Optional: Set a default value
+        default: "$(date)" 
+      - name: "author"
+        label: "Author Name"
+        type: "string"
+      - name: "tags"
+        label: "Tags"
+        type: "array"
+        
+    # The main body content field
+    body:
+      label: "Content"
+      type: "markdown"
+
+  # 2. Pages Collection
+  - name: "pages"
+    label: "Static Pages"
+    files: "pages/*.md"
+    view: "list"
+    
+    fields:
+      - name: "title"
+        label: "Page Title"
+        type: "string"
+        required: true
+      - name: "permalink"
+        label: "URL Slug"
+        type: "string"
+        # Custom validation using a regular expression
+        pattern: "^[a-z0-9\\-]*$" 
+    
+    body:
+      label: "Page Body"
+      type: "html"
+
+# --- General Settings ---
+# You can define general CMS settings here if the CMS supports them.
+settings:
+  # Example setting: Defines the default file format for new files
+  default_format: "markdown"
+  # Example setting: Defines the path for uploaded media files
+  media_path: "assets/images"
