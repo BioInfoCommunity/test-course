@@ -1,9 +1,15 @@
----
-title: Home
-layout: default
----
+# Page 1
 
-# Welcome to AlphaFold Practical Guide
 
-- [Course page 2](page2.html)
-- [Course 2](2025/10/16/second-course.html)
+
+1. Item 1
+2. Item 2
+
+
+
+| Header1 | Header2 | Header3 |
+|----|----|----|
+| A1 | B1  | C1 |
+| A2 | B2 | C2 |
+
+
