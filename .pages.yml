@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: bioinfocommunity/AlphaFold-A-practical-guide
+  repo: bioinfocommunity/test-course
   branch: main  # default branch
   auth_type: implicit
 
