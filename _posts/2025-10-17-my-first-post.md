@@ -1,7 +1,6 @@
 ---
 title: "My First Post"
-date: 2025-10-17
-published: false
+date: 2025-10-16
 ---
 
 # This is a test file
