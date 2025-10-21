@@ -2,7 +2,7 @@ backend:
   name: github
   repo: BioInfoCommunity/test-course   # 👈 replace with your GitHub repo
   branch: main                        # or 'master'
-  base_url: https://1aqk2aes0f.execute-api.eu-west-2.amazonaws.com/callback  # optional
+  base_url: https://1aqk2aes0f.execute-api.eu-west-2.amazonaws.com  # optional
   auth_endpoint: auth
 
 media_folder: "assets/uploads"
