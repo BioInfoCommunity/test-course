@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OAuth Callback</title>
+</head>
+<body>
+  <h2>Processing authentication...</h2>
+  <p id="status">Connecting to authentication server...</p>
+  
+  <script>
+    (function() {
+      'use strict';
+      
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      
+      console.log('Callback received code:', !!code);
+      
+      if (!code) {
+        document.getElementById('status').textContent = 'Error: No authorization code received';
+        return;
+      }
+      
+      // Exchange code for token via your Lambda
+      const lambdaUrl = 'https://1aqk2aes0f.execute-api.eu-west-2.amazonaws.com/callback';
+      
+      fetch(`${lambdaUrl}?code=${code}&state=${state || ''}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log('Token received:', !!data.access_token);
+          
+          if (data.access_token) {
+            const message = 'authorization:github:success:' + JSON.stringify({
+              token: data.access_token,
+              provider: 'github'
+            });
+            
+            console.log('Sending message to opener');
+            
+            if (window.opener) {
+              window.opener.postMessage(message, window.location.origin);
+              
+              setTimeout(() => {
+                window.close();
+              }, 1000);
+            }
+          } else {
+            document.getElementById('status').textContent = 'Error: ' + (data.error || 'Unknown error');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          document.getElementById('status').textContent = 'Error: ' + err.message;
+        });
+    })();
+  </script>
+</body>
+</html>
