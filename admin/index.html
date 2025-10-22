@@ -8,15 +8,44 @@
 </head>
 <body>
   <script>
+    // Log ALL messages received
     window.addEventListener('message', function(event) {
       console.log('=== MESSAGE RECEIVED ===');
       console.log('Origin:', event.origin);
       console.log('Data:', event.data);
       console.log('Data type:', typeof event.data);
+      
+      // Check if it's the auth message
+      if (typeof event.data === 'string' && event.data.indexOf('authorization:github') === 0) {
+        console.log('🎉 AUTH MESSAGE DETECTED!');
+        
+        // Try to manually parse it
+        try {
+          const parts = event.data.split(':');
+          console.log('Message parts:', parts);
+          if (parts[2] === 'success' && parts[3]) {
+            const payload = JSON.parse(parts.slice(3).join(':'));
+            console.log('Token extracted:', payload.token ? 'YES' : 'NO');
+          }
+        } catch (e) {
+          console.error('Failed to parse:', e);
+        }
+      }
       console.log('=======================');
     }, false);
-</script>
+    
+    // Monitor Decap CMS initialization
+    console.log('Loading Decap CMS...');
+  </script>
+  
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
-  </body>
+  <script>
+    // After Decap loads
+    setTimeout(function() {
+      console.log('Decap CMS loaded');
+      console.log('CMS object:', typeof window.CMS);
+    }, 1000);
+  </script>
+</body>
 </html>
