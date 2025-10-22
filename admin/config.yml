@@ -4,8 +4,6 @@ backend:
   branch: main                        # or 'master'
   base_url: https://bioinfocommunity.github.io/test-course
   auth_endpoint: auth
-  site_domain: bioinfocommunity.github.io
-  use_popup: false
 
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"
