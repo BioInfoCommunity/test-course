@@ -6,14 +6,25 @@
 </head>
 <body>
   <div style="font-family: sans-serif; text-align: center; padding: 50px;">
-    <h2>🔄 Redirecting to GitHub for authentication...</h2>
+    <h2>🔄 Redirecting to GitHub...</h2>
     <p>Please wait...</p>
   </div>
   
   <script>
-    // Immediately redirect to your Lambda auth endpoint
-    console.log('Redirecting to Lambda auth endpoint...');
-    window.location.href = 'https://1aqk2aes0f.execute-api.eu-west-2.amazonaws.com/auth';
+    (function() {
+      // Get any state parameter from the query string (passed by Decap CMS)
+      const params = new URLSearchParams(window.location.search);
+      const state = params.get('state') || '';
+      
+      console.log('Auth page - state:', state);
+      
+      // Build the Lambda URL with state parameter
+      const lambdaUrl = 'https://1aqk2aes0f.execute-api.eu-west-2.amazonaws.com/auth';
+      const redirectUrl = state ? lambdaUrl + '?state=' + encodeURIComponent(state) : lambdaUrl;
+      
+      console.log('Redirecting to:', redirectUrl);
+      window.location.href = redirectUrl;
+    })();
   </script>
 </body>
 </html>
