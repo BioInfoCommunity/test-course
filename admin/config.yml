@@ -5,6 +5,7 @@ backend:
   base_url: https://1aqk2aes0f.execute-api.eu-west-2.amazonaws.com  # optional
   auth_endpoint: auth
   site_domain: bioinfocommunity.github.io
+  use_popup: false
 
 media_folder: "assets/uploads"
 public_folder: "/assets/uploads"
