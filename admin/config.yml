@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: BioInfoCommunity/test-course   # 👈 replace with your GitHub repo
+  repo: bioinfocommunity/test-course   # 👈 replace with your GitHub repo
   branch: main                        # or 'master'
   base_url: https://bioinfocommunity.github.io/test-course
   auth_endpoint: auth
