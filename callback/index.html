@@ -34,139 +34,127 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    pre {
+      text-align: left;
+      background: #f5f5f5;
+      padding: 10px;
+      font-size: 11px;
+      overflow: auto;
+      max-height: 200px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>🔐 Processing Authentication</h2>
     <div class="spinner"></div>
-    <p id="status">Exchanging authorization code for access token...</p>
+    <p id="status">Exchanging authorization code...</p>
+    <pre id="debug" style="display:none;"></pre>
   </div>
   
   <script>
     (function() {
       'use strict';
       
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      const state = params.get('state');
+      const debugEl = document.getElementById('debug');
+      const statusEl = document.getElementById('status');
       
-      console.log('=== CALLBACK PAGE ===');
-      console.log('Code received:', !!code);
-      console.log('Has opener:', !!window.opener);
+      function log(msg) {
+        console.log(msg);
+        if (debugEl) {
+          debugEl.style.display = 'block';
+          debugEl.textContent += msg + '\n';
+        }
+      }
       
-      function updateStatus(message, isError) {
-        const statusEl = document.getElementById('status');
+      function updateStatus(msg, isError) {
         if (statusEl) {
-          statusEl.textContent = message;
+          statusEl.textContent = msg;
           if (isError) statusEl.style.color = 'red';
         }
       }
       
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      
+      log('=== CALLBACK START ===');
+      log('Code: ' + (code ? 'YES' : 'NO'));
+      log('Opener: ' + (window.opener ? 'YES' : 'NO'));
+      log('Origin: ' + window.location.origin);
+      
       if (!code) {
-        console.error('No code parameter');
-        updateStatus('Error: No authorization code received', true);
+        log('ERROR: No code');
+        updateStatus('Error: No authorization code', true);
         return;
       }
       
       if (!window.opener) {
-        console.error('No window.opener');
-        updateStatus('Error: Lost connection to parent window', true);
+        log('ERROR: No opener');
+        updateStatus('Error: No parent window', true);
         return;
       }
       
-      // Exchange code for token via your Lambda
+      // Exchange code for token
       const lambdaUrl = 'https://1aqk2aes0f.execute-api.eu-west-2.amazonaws.com/callback';
-      const requestUrl = `${lambdaUrl}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || '')}`;
+      const url = lambdaUrl + '?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state || '');
       
-      console.log('Fetching token from Lambda...');
-      updateStatus('Fetching access token...');
+      log('Fetching: ' + lambdaUrl);
+      updateStatus('Contacting server...');
       
-      fetch(requestUrl)
-        .then(response => {
-          console.log('Lambda response status:', response.status);
+      fetch(url)
+        .then(function(response) {
+          log('Response status: ' + response.status);
           return response.json();
         })
-        .then(data => {
-          console.log('Lambda response data:', data);
+        .then(function(data) {
+          log('Data received: ' + JSON.stringify(data));
           
-          if (data.access_token) {
-            console.log('✓ Access token received');
-            updateStatus('Token received! Redirecting to CMS...');
-            
-            // Try MULTIPLE message formats that different versions of Decap/Netlify CMS expect
-            const token = data.access_token;
-            
-            // Format 1: String with embedded JSON (what we tried)
-            const message1 = 'authorization:github:success:' + JSON.stringify({
-              token: token,
-              provider: 'github'
-            });
-            
-            // Format 2: Object with data property
-            const message2 = {
-              type: 'authorization:github:success',
-              data: {
-                token: token,
-                provider: 'github'
-              }
-            };
-            
-            // Format 3: Simpler string format
-            const message3 = `authorization:github:success:${JSON.stringify({token: token})}`;
-            
-            console.log('Attempting to send messages...');
-            console.log('Message 1 (string):', message1);
-            console.log('Message 2 (object):', message2);
-            console.log('Message 3 (simple):', message3);
-            
-            const targetOrigin = window.location.origin;
-            console.log('Target origin:', targetOrigin);
-            
-            // Send all three formats - Decap CMS will accept whichever one it expects
-            try {
-              window.opener.postMessage(message1, targetOrigin);
-              console.log('✓ Sent message format 1');
-              
-              setTimeout(() => {
-                window.opener.postMessage(message2, targetOrigin);
-                console.log('✓ Sent message format 2');
-              }, 100);
-              
-              setTimeout(() => {
-                window.opener.postMessage(message3, targetOrigin);
-                console.log('✓ Sent message format 3');
-              }, 200);
-              
-            } catch (e) {
-              console.error('Error sending messages:', e);
-            }
-            
-            // Close window after a delay
-            setTimeout(() => {
-              console.log('Closing window...');
-              window.close();
-              
-              // Fallback if close doesn't work
-              setTimeout(() => {
-                updateStatus('Authentication complete! You may close this window.');
-              }, 500);
-            }, 1500);
-            
-          } else if (data.error) {
-            console.error('Lambda returned error:', data.error);
-            updateStatus('Error: ' + data.error, true);
-          } else {
-            console.error('Unexpected response:', data);
-            updateStatus('Error: Unexpected response from server', true);
+          if (!data.access_token) {
+            log('ERROR: No token in response');
+            updateStatus('Error: No access token', true);
+            return;
           }
+          
+          updateStatus('Sending token to CMS...');
+          
+          const token = data.access_token;
+          log('Token: ' + token.substring(0, 10) + '...');
+          
+          // THIS IS THE KEY: Send the message in the EXACT format Decap expects
+          // Based on decap-cms-core source code
+          const message = 'authorization:github:success:' + JSON.stringify({
+            token: token,
+            provider: 'github'
+          });
+          
+          log('Message: ' + message.substring(0, 50) + '...');
+          log('Sending to: ' + window.location.origin);
+          
+          // Send message
+          window.opener.postMessage(message, window.location.origin);
+          log('✓ Message sent');
+          
+          updateStatus('Success! Closing...');
+          
+          // Don't close immediately - give more time for message to be processed
+          setTimeout(function() {
+            log('Attempting to close...');
+            window.close();
+            
+            // If window doesn't close, show message
+            setTimeout(function() {
+              updateStatus('Done! You can close this window.');
+              debugEl.style.display = 'block';
+            }, 1000);
+          }, 2000); // Wait 2 seconds before closing
+          
         })
-        .catch(err => {
-          console.error('Fetch error:', err);
+        .catch(function(err) {
+          log('ERROR: ' + err.message);
           updateStatus('Error: ' + err.message, true);
         });
       
-      console.log('=== END CALLBACK SCRIPT ===');
     })();
   </script>
 </body>
