@@ -7,6 +7,15 @@
   <link href="https://unpkg.com/decap-cms@^3.0.0/dist/cms.css" rel="stylesheet" />
 </head>
 <body>
+  <script>
+    window.addEventListener('message', function(event) {
+      console.log('=== MESSAGE RECEIVED ===');
+      console.log('Origin:', event.origin);
+      console.log('Data:', event.data);
+      console.log('Data type:', typeof event.data);
+      console.log('=======================');
+    }, false);
+</script>
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   
   </body>
